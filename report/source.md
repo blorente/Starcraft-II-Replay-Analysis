@@ -1,117 +1,133 @@
-% Starcraft 2 League Prediction
+% Starcraft II League Prediction
 % Borja Lorente Escobar
 % February 2017
 
-Domain and Dataset
+Domain and Motivation
 ========
-Starcraft 2 is a Real Time Strategy game, launched in 2010 by Blizzard. Since then, it has become one of the most popular competitive games of it's time, kickstarting the ascent of the E-sports into the mainstream.
+Starcraft II is a Real Time Strategy game, launched in 2010 by Blizzard. Since then, it has become one of the most popular competitive games of it's time, kickstarting the ascent of the E-sports into the mainstream.
 
 As it is common in gaming, the community has gathered a collective knowledge of the characteristics of a good player. Some of these features are measurable, and players seeking to improve are often met with the advice that they analyze their scores in these aspects, and try to improve them. The most prominent measures of players skill are commonly:
 
 * **Actions Per Minute** or **APM**, the number of mouse clicks, moves or key presses a player performs. The best players have an APM of around 400, while an average player will rarely go over 120.
+* **Workers Created**. In Starcraft II, the player with the most resources usually wins the game, and thus it is deemed important for a good player to constantly be creating workers to gather as many resources as possible.
+* **Minimap Clicks**. Since a Starcraft II player has to control every single unit in the team, many places often require immediate attention, such as jumping from a battle on one side of the map to creating new workers back at the base. This is why efficient camera movement is vital for a player, and therefore a good player will often click on the minimap to move the camera, instead of dragging it to the sides, as it is much faster.
 
-Input Details
+The aim of this study is to determine how useful these player traits are when trying to predict the skill level of a player. In the case that they're not very significant, a secondary goal is to determine _which_ attributes are truly determinant of a player's skill.
+
+To that end, the analyzed data has been extracted from game replays of real users of every ranking.
+
+Dataset Details
 -------------
-Data comes in csv files, accompanied with a `R` script that can be used to
-merge data from both subjects, unfortunately when exporting that data structure
-from `R` to `Octave` it is a collection of hashes, not a regular matrix, which
-makes it harder to work with it.
+The [extracted data](1) comes in the form of a `.csv` file containing data from over 3300 games, one data point per line, organized by columns denoting the various values of the studied attributes:
 
-Because of that and because the number of students from portuguese the subject
-(649) was much greater than the number of math (395) we only included those
-results from the portuguese subjects here, although in measures with the math
-data set results were very close (around ±3% variance).
+|       |         |           |
+|------------------|--------------------|-----------------|
+| GameID           | **LeagueIndex**        | Age             |
+| HoursPerWeek     | TotalHours         | **APM**           |
+| SelectByHotkeys  | AssignToHotkeys    | UniqueHotkeys   |
+| MinimapAttacks   | **MinimapRightClicks** | NumberOfPACs    |
+| GapBetweenPACs   | ActionLatency      | ActionsInPAC    |
+| TotalMapExplored | **WorkersMade**        | UniqueUnitsMade |
+| ComplexUnitsMade | ComplexAbilityUsed | MaxTimeStamp    |
 
-Because the csv file used characters to represent data we had to convert
-everything to numbers, that procedure can be seen in `getData`.
+The **LeagueIndex** attribute denotes the rank of the player, from Bronze to Diamod, with a higher number indicating a higher rating.
+
+To preprocess the data, `Octave`'s built-in `.csv` manipulation tools were used, by loading the file and stripping the header:
+
 ```octave
-function [X,y] = getData(filepath)
-	preProcessData(filepath);
-
-	data = csvread([filepath '.oct']);
-
-	X = data(:, 1:32);
-	y = data(:, 33);
-end
-
-function preProcessData(filepath)
-	filestr = fileread(filepath);
-	filestr = substr(filestr, 229);
-	filestr = strrep(filestr, 'GP', '0');
-	filestr = strrep(filestr, 'MS', '1');
-	filestr = strrep(filestr, 'M', '0');
-	filestr = strrep(filestr, 'F', '1');
-	[...]
-	filestr = strrep(filestr, '"', '');
-	octcsv = fopen([filepath '.oct'], 'w');
-	fprintf(octcsv, '%s', filestr);
-end
+raw_data = dlmread('rawdata/starcraft.csv', ',');
+% Ignore the first row (names)
+raw_data = raw_data(2:rows(raw_data), :);
+% Select base attributes
+[X, y] = selectBaseAttributes(raw_data);
+% Split samples into training, validation and test sets
+[X_train, y_train, X_val, y_val, X_test, y_test] = splitSamples(X, y);
 ```
 
-Columns 1 through 30 are related to socio-economical status like parents
-situation, alcohol consumption, whether they are on a relationship, etc...,
-31 and 32 are first and second semester marks.
+This structure gives the necessary flexibility to study the effects of different attribute selections (by modifying `selectBaseAttributes`), and to create arbitrary sets of samples for test and validation.
 
-The Conundrum
--------------
-As the original researchers did on their paper the attributes of the first and
-second semester have a lot more weight than the other attributes.
+After some adjustments, the following split was fould the most satisfying for the distribution of samples, which were obtained by a random shuffling of the samples with the following code:
 
-As such here we included the final hit percentage of both options, with and
-without previous years mark, but the graphics section refer only to the with
-executions, as they were the ones that worked better and had more relevance.
+| Training | Validation | Test |
+|----------|------------|------|
+| 80%      | 10%        | 10%  |
 
-On the original paper Business Intelligence methods worked the best in these
-cases, but as they were out of the scope of this subject they were left out.
+```octave
+function [X_train, y_train, X_val, y_val, X_test, y_test] = splitSamples(X, y)
+	m = rows(X);
 
-Methods Used
+	train_percent = 0.8;
+	val_percent = 0.1;
+	test_percent = 0.1;
+	train_size = floor(train_percent * m);
+	val_size = floor(val_percent * m);
+	test_size = floor(test_percent * m);
+
+	index_vector = randperm(m);
+	index = 1;
+	train_indices = index_vector(index:(index + train_size));
+	index += train_size;
+	val_indices = index_vector(index:(index + val_size));
+	index += val_size;
+	test_indices = index_vector(index:(index + test_size));
+
+	X_train = X(train_indices, :);
+	y_train = y(train_indices, :);
+	X_val = X(val_indices, :);
+	y_val = y(val_indices, :);
+	X_test = X(test_indices, :);
+	y_test = y(test_indices, :);
+end  % splitSamples
+```
+
+Methodology
 ============
 
-Classification Techniques
--------------------------
-* Logistic Regression
-* Neural Network
-* Support Vector Machines
+As this was an exploratory study, there were several iterations over the classification techniques used.
 
-Testing Techniques
-------------------
-* Single Holdout Validation
-
-Training Ratios
----------------
-* 70 % Training Examples
-* 10 % Adjustment Examples
-* 20 % Validation Examples
+However, some things became apparent from the beginning, such as the inability of **Support Vector Machines** to correctly predict the league of a player, **never reaching an accuracy of 10% over the set samples**. Therefore, even though the used hyper-parameters will be explained in the following section and the source code can be found in the annex, the results have been omitted from the discussion of the different iterations. The focus of the results is therefore on the **Logistic Regression** and **Neural Networks**.
 
 Hyper-parameters Adjustment
 ---------------------------
 
-Where two or more hyper-parameters where listed we created a matrix with all
-possible combinations and iterated all over it.
+Where two or more hyper-parameters where listed the program iterated over all the possible combinations of the sets.
 
 ### Logistic Regression
 ```octave
-λ = [0,0.1,0.2,0.5,1,2,5,10,15,20,25];
+λ = 0:0.01:0.5;
 ```
 
-Using `fminunc` with a max of 1000 iterations.
+Using `fminunc` with a max of 5000 iterations.
 
 ### Neural Networks
 ```octave
-λ = [0,1,10,100];
-hidden_nodes = [0,1,10,100];
+λ = 0:0.1:5;
+hidden_layer_sizes = [5, 10, 25, 50, 100, 150];
 ```
 
-Using `fmingc` with up to 1000 iterations were allowed, but the best result
-hover over ~96 iterations.
+Using `fmingc` with up to 5000 iterations were allowed. With hidden layer sizes above 25, all iterations were used up by the function. In addition to that, higher layer sizes seem to predict better with higher `λ`s.
+
+In the result graphs, only the best graph is shown out of all the hidden layer sizes.
 
 ### Support Vector Machines
 ```octave
-C = [0.01,1,10,100];
-σ = [0.01,1,10,100];
+CSigma_seeds = 0.01:0.01:0.04;
+CSigma_iterations = 5;
 ```
+Here the C and sigma values were created by iterating over the `CSigma_seeds` vector in the following manner:
 
-A Gaussian kernel was used, as it was the one which had the best results.
+```octave
+function [pool] = generateValuePool(seeds, iterations)
+	pool = zeros(columns(seeds), iterations);
+	for i = 0:iterations
+		pool(:, i + 1) = seeds .* (10 ^ i);
+	endfor
+	% Vectorize pool
+	poolsize = numel(pool);
+	pool = reshape(pool, 1, poolsize);
+endfunction
+
+```
 
 Results
 =======
