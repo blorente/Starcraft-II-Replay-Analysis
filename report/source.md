@@ -182,18 +182,13 @@ Graphics
 
 Following are the graphs showing the accuracy of the best executions, with information about the used parameters.
 
+![Logistic Regression, Hand-picked attributes, binary decision](img/LR/HP_bin.png)
 
-### Logistic Regression
+![Neural Network, All attributes, precise prediction, 100 hidden nodes](img/NN/ALL_prec_100.png)
 
-![Hand-picked attributes, binary decision](img/LR/HP_bin.png)
+![Neural Network, All attributes, binary decision, 25 hidden nodes](img/NN/ALL_bin_25.png)
 
-As it can be seen, the most effective `λ` seems to be `0`.
-
-### Neural Network
-
-![All attributes, precise prediction, 100 hidden nodes](img/NN/ALL_prec_100.png)
-
-![All attributes, binary decision, 25 hidden nodes](img/NN/ALL_bin_25.png)
+\pagebreak
 
 Conclusions
 ===========
