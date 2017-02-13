@@ -87,6 +87,7 @@ As this was an exploratory study, there were several iterations over the classif
 
 However, some things became apparent from the beginning, such as the inability of **Support Vector Machines** to correctly predict the league of a player, **never reaching an accuracy of 10% over the set samples**. Therefore, even though the used hyper-parameters will be explained in the following section and the source code can be found in the annex, the results have been omitted from the discussion of the different iterations. The focus of the results is therefore on the **Logistic Regression** and **Neural Networks**.
 
+
 Hyper-parameters Adjustment
 ---------------------------
 
@@ -129,117 +130,85 @@ endfunction
 
 ```
 
+Iterations
+-------------
+
+Three sets of attributes were tested:
+* The original set of **APM**, **WorkersMade** and **MinimapRightClicks**.
+* All of the attributes.
+* A hand-picked set of attributes [from a previous researcher][2]. The selected attributes were the ones that scored higher than 20.
+
+Over these sets of attributes, two different approaches were used:
+
+* To try to predict a player's exact **LeagueIndex**, from 1 to 7.
+* To transform the problem into a binary decision problem, by classifying the examples into _High Rating_ (**LeagueIndex** above 4, Diamond or above) and _Low Rating_ (Platinum or below).
+
 Results
 =======
 
 Percentages
 -----------
-This table reflects the best results achieved, changing not only,
-hyper-parameters but also the confidence threshold, these can be
-seen on both figures 1 and 5.
+This tables reflect the best results achieved for both problems, in the given datasets. In bold the best percentages of accuracy over the test samples of each category.
 
-In bold the best percentage of each category.
+### With APM, WorkersMade and MinimapRightClicks
 
-| Method        | With previous marks | W/o previous marks |
+| Method       | Precise prediction | Binary decision |
 |---------------|:-------------------:|:------------------:|
-| LR            |        85.28%       |      **69.94%**    |
-| NN            |      **88.72%**     |        69.74%      |
-| SVM           |        83.97%       |        66.41%      |
+| LR            |        21.01%       |      40.94%    |
+| NN            |      29.02%     |        50.74%      |
 
+### With all attributes
+
+| Method       | Precise prediction | Binary decision |
+|---------------|:-------------------:|:------------------:|
+| LR            |        38.15%       |      75.18%  |
+| NN            |      **42.26%**     |        **83.65%**    |
+
+### With the hand-picked attribute set
+
+| Method       | Precise prediction | Binary decision |
+|---------------|:-------------------:|:------------------:|
+| LR            |        34.48%       |      76.84%  |
+| NN            |      36.54%     |        80.78%    |
 
 Graphics
-========
+-----------
 
-Following some graphs showing the breakdown of accuracy, recall, learning
-curves or the adjustment planes of the different methods
+Following are the graphs showing the accuracy of the best executions, with information about the used parameters.
 
-![Logistic Regression Accuracy](graphs/logisticRegression/accuracy.png)
 
-Logistic regression Accuracy is more or less stable even when changing the
-threshold.
+### Logistic Regression
 
-![Logistic Regression Learning](graphs/logisticRegression/learning.png)
+![Hand-picked attributes, binary decision](img/LR/HP_bin.png)
 
-![Logistic Regression Recall](graphs/logisticRegression/recall.png)
+As it can be seen, the most effective `λ` seems to be `0`.
 
-![Logistic Regression Adjustment](graphs/logisticRegression/adjustment.png)
+### Neural Network
 
-![Neural Network Accuracy](graphs/neuralNetwork/accuracy.png)
+![All attributes, precise prediction, 100 hidden nodes](img/NN/ALL_prec_100.png)
 
-![Neural Network Learning](graphs/neuralNetwork/learning.png)
-
-![Neural Network Recall](graphs/neuralNetwork/recall.png)
-
-![Support Vector Machine Adjustment](graphs/supportVectorMachine/adjusting.png)
-
+Conclusions
+===========
+It immediately became obvious that _just_ **APM**, **WorkersMade** and **MinimapRightClicks** were _not sufficient_ to determine a player's skill level. However, it is noteworthy that **APM** has a high score in the hand-picked set of attributes, which were very close to the best prediction. Therefore, we can assume that **APM** is in fact a relevant factor for a player's rank.
 
 Possible Improvements
 =====================
 
-K-Fold Cross Validation
--------------------------
-`Matlab` `crossvalind` functions makes this pretty easy, unfortunately `Octave`
-has no direct equivalent, and although it is not exceedingly hard to code it,
-it is not trivial to make it generic enough so it works for every size of data.
-
-There is a half-coded implementation of a 10-fold validation but it tended to
-produce some errors with certain example sizes.
-
-Parallelization
----------------
-While the Neural Network in the code has parallel capacities because `fmincg`
-(the gradient descent algorithm we use) seems smart enough to take advantage of
-multiple cores the SVM and the LR did not had any parallel capacity, this meant
-that on our 4-core machine we were wasting a lot of cycles.
-
-To illustrate this even with this small set of data running the three strategies
-could take upwards of half an hour, this is including the adjusting option on
-all three, even then, seems like very poor performance with no scalability.
-
-This could be trivialy parallelized with `Matlab` `parfor` syntax but in `Octave`
-this is syntactic sugar for just a `for` loop, the only analogue option is the
-`parallel` package in the Octave forge, unfortunately there wasn't just enough
-time.
-
-Better Stratification
+SVM libraries
 ---------------------
-The stratification used this time was a bit *manual* in the sense that in order
-to mix the slices a variable had to be be changed on the source code, it would
-have been great to have automatic random stratification, but unfortunately,
-again, not enough time.
+The poor results of the Support Vector Machines may be due to an undetected implementation error, which may be solved by using tried-and-true third-party libraries such as [`libsvm`][3].
 
 Decision Trees
 --------------
-On the original paper the authors get a much better result with decision
-trees and naive Bayes tha with plain machine learning algorithms, but because
-we set out to not use any library but what was coded by us we didn't had any
-implementation of decision trees at the time
-
-Conclusions
-===========
-Predicting Student Performance only with socio-economical context is hard,
-however with previous academic results we can not only provide an accurate
-binary assertion on whether the student will pass or fail, but we can with
-relative precision the range where the mark will be.
-
-These results seems to indicate that with enough data machine learning could be
-successfully applied to education analysis.
-
-Another point to make is that even-though Machine Learning Techniques are not
-the most adequate to try to examine and extract what attributes where taken
-into account the most we can examine the theta vector given by the logistic
-regression to infer the following:
-
-* Trying to analyze & predict anything to do with human behavior is hard
-* When we don't take into account the previous mark the absences and the
-	desire to study higher education are the most important factors
-	+ Age plays quite an important factor (The lower, the better)
-	+ Doing extra activities is as important as going to paid extra classes
-	+ Previous school years failures are also important (And related to age)
+Another researcher got similar results with decision trees for the binary decision problem, but because we set out to not use any library we didn't have any implementation of decision trees available.
 
 References
 ==========
 
-[P. Cortez and A. Silva. Using Data Mining to Predict Secondary School Student Performance. In A. Brito and J. Teixeira Eds., Proceedings of 5th FUture BUsiness TEChnology Conference (FUBUTEC 2008) pp. 5-12, Porto, Portugal, April, 2008, EUROSIS, ISBN 978-9077381-39-7.](http://www3.dsi.uminho.pt/pcortez/student.pdf)
+[[2] https://www.kaggle.com/jonathanbouchet/d/sfu-summit/starcraft-ii-replay-analysis/leagueindex-prediction](https://www.kaggle.com/jonathanbouchet/d/sfu-summit/starcraft-ii-replay-analysis/leagueindex-prediction)
 
-[Code & Data](https://github.com/AlvarBer/Students-Performance-Analysis)
+[[3]https://github.com/cjlin1/libsvm (https://github.com/cjlin1/libsvm)]
+
+[Original source for the project and this paper](https://github.com/blorente/Starcraft-II-Replay-Analysis)
+
+[Pandoc compilation script and template by Álvaro Bermejo](https://github.com/AlvarBer)
