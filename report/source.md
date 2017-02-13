@@ -18,7 +18,7 @@ To that end, the analyzed data has been extracted from game replays of real user
 
 Dataset Details
 -------------
-The [extracted data](1) comes in the form of a `.csv` file containing data from over 3300 games, one data point per line, organized by columns denoting the various values of the studied attributes:
+The extracted data(1) comes in the form of a `.csv` file containing data from over 3300 games, one data point per line, organized by columns denoting the various values of the studied attributes:
 
 |       |         |           |
 |------------------|--------------------|-----------------|
@@ -52,6 +52,8 @@ After some adjustments, the following split was fould the most satisfying for th
 |----------|------------|------|
 | 80%      | 10%        | 10%  |
 
+\pagebreak
+
 ```octave
 function [X_train, y_train, X_val, y_val, X_test, y_test] = splitSamples(X, y)
 	m = rows(X);
@@ -79,6 +81,8 @@ function [X_train, y_train, X_val, y_val, X_test, y_test] = splitSamples(X, y)
 	y_test = y(test_indices, :);
 end  % splitSamples
 ```
+
+\pagebreak
 
 Methodology
 ============
@@ -136,12 +140,14 @@ Iterations
 Three sets of attributes were tested:
 * The original set of **APM**, **WorkersMade** and **MinimapRightClicks**.
 * All of the attributes.
-* A hand-picked set of attributes [from a previous researcher][2]. The selected attributes were the ones that scored higher than 20.
+* A hand-picked set of attributes from a previous researcher(2). The selected attributes were the ones that scored higher than 20.
 
 Over these sets of attributes, two different approaches were used:
 
 * To try to predict a player's exact **LeagueIndex**, from 1 to 7.
 * To transform the problem into a binary decision problem, by classifying the examples into _High Rating_ (**LeagueIndex** above 4, Diamond or above) and _Low Rating_ (Platinum or below).
+
+\pagebreak
 
 Results
 =======
@@ -196,7 +202,7 @@ Possible Improvements
 
 SVM libraries
 ---------------------
-The poor results of the Support Vector Machines may be due to an undetected implementation error, which may be solved by using tried-and-true third-party libraries such as [`libsvm`][3].
+The poor results of the Support Vector Machines may be due to an undetected implementation error, which may be solved by using tried-and-true third-party libraries such as `libsvm`(3).
 
 Decision Trees
 --------------
@@ -205,10 +211,12 @@ Another researcher got similar results with decision trees for the binary decisi
 References
 ==========
 
-[[2] https://www.kaggle.com/jonathanbouchet/d/sfu-summit/starcraft-ii-replay-analysis/leagueindex-prediction](https://www.kaggle.com/jonathanbouchet/d/sfu-summit/starcraft-ii-replay-analysis/leagueindex-prediction)
+(1): [https://www.kaggle.com/sfu-summit/starcraft-ii-replay-analysis](https://www.kaggle.com/sfu-summit/starcraft-ii-replay-analysis)
 
-[[3]https://github.com/cjlin1/libsvm (https://github.com/cjlin1/libsvm)]
+(2): [https://goo.gl/zXpwFP](https://www.kaggle.com/jonathanbouchet/d/sfu-summit/starcraft-ii-replay-analysis/leagueindex-prediction)
 
-[Original source for the project and this paper](https://github.com/blorente/Starcraft-II-Replay-Analysis)
+(3): [https://github.com/cjlin1/libsvm](https://github.com/cjlin1/libsvm)
 
-[Pandoc compilation script and template by Álvaro Bermejo](https://github.com/AlvarBer)
+Original source for the project and this paper: [https://github.com/blorente/Starcraft-II-Replay-Analysis](https://github.com/blorente/Starcraft-II-Replay-Analysis)
+
+Pandoc compilation script and template by Álvaro Bermejo: [https://github.com/AlvarBer](https://github.com/AlvarBer)
