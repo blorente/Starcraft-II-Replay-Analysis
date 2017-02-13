@@ -1,0 +1,11 @@
+source('algorithms/NeuralNetwork//applyNN.m');
+source('algorithms/NeuralNetwork//costNN.m');
+source('algorithms/NeuralNetwork//createInitialThetas.m');
+source('algorithms/NeuralNetwork//dsigmoid.m');
+source('algorithms/NeuralNetwork//fmincg.m');
+source('algorithms/NeuralNetwork//hypothesis.m');
+source('algorithms/NeuralNetwork//propagate.m');
+source('algorithms/NeuralNetwork//randomWeights.m');
+source('algorithms/NeuralNetwork//recoverThetas.m');
+source('algorithms/NeuralNetwork//sigmoid.m');
+source('algorithms/NeuralNetwork//unrolly.m');
