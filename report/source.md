@@ -140,7 +140,7 @@ Iterations
 Three sets of attributes were tested:
 * The original set of **APM**, **WorkersMade** and **MinimapRightClicks**.
 * All of the attributes.
-* A hand-picked set of attributes from a previous researcher(2). The selected attributes were the ones that scored higher than 20.
+* A hand-picked set of attributes from a previous researcher(2). The selected attributes were the ones that scored highest. The column references are `[5, 6, 7, 12, 13, 14]`.
 
 Over these sets of attributes, two different approaches were used:
 
@@ -192,6 +192,8 @@ As it can be seen, the most effective `λ` seems to be `0`.
 ### Neural Network
 
 ![All attributes, precise prediction, 100 hidden nodes](img/NN/ALL_prec_100.png)
+
+![All attributes, binary decision, 25 hidden nodes](img/NN/ALL_bin_25.png)
 
 Conclusions
 ===========
