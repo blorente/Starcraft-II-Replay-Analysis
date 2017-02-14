@@ -10,7 +10,7 @@ As it is common in gaming, the community has gathered a collective knowledge of 
 
 * **Actions Per Minute** or **APM**, the number of mouse clicks, moves or key presses a player performs. The best players have an APM of around 400, while an average player will rarely go over 120.
 * **Workers Created**. In Starcraft II, the player with the most resources usually wins the game, and thus it is deemed important for a good player to constantly be creating workers to gather as many resources as possible.
-* **Minimap Clicks**. Since a Starcraft II player has to control every single unit in the team, many places often require immediate attention, such as jumping from a battle on one side of the map to creating new workers back at the base. This is why efficient camera movement is vital for a player, and therefore a good player will often click on the minimap to move the camera, instead of dragging it to the sides, as it is much faster.
+* **Minimap Clicks**. Since a Starcraft II player has to control every single unit in the team, many points of the map often require attention at once, such as jumping from a battle on one side of the map to creating new workers back at the base. This is why efficient camera movement is vital for a player, and therefore a good player will often click on the minimap to move the camera, instead of dragging it to the sides.
 
 The aim of this study is to determine how useful these player traits are when trying to predict the skill level of a player. In the case that they're not very significant, a secondary goal is to determine _which_ attributes are truly determinant of a player's skill.
 
@@ -89,7 +89,7 @@ Methodology
 
 As this was an exploratory study, there were several iterations over the classification techniques used.
 
-However, some things became apparent from the beginning, such as the inability of **Support Vector Machines** to correctly predict the league of a player, **never reaching an accuracy of 10% over the set samples**. Therefore, even though the used hyper-parameters will be explained in the following section and the source code can be found in the annex, the results have been omitted from the discussion of the different iterations. The focus of the results is therefore on the **Logistic Regression** and **Neural Networks**.
+However, some things became apparent from the beginning, such as the inability of **Support Vector Machines** to correctly predict the league of a player, **never reaching an accuracy of 10% over the test set**. Therefore, even though the used hyper-parameters will be explained in the following section and the source code can be found in the annex, the results have been omitted from the discussion of the different iterations. The focus of the results is on the **Logistic Regression** and **Neural Networks**.
 
 
 Hyper-parameters Adjustment
@@ -99,24 +99,24 @@ Where two or more hyper-parameters where listed the program iterated over all th
 
 ### Logistic Regression
 ```octave
-λ = 0:0.01:0.5;
+lambda = [0:0.01:0.5];
 ```
 
-Using `fminunc` with a max of 5000 iterations.
+Using `fmincg` with a max of 5000 iterations.
 
 ### Neural Networks
 ```octave
-λ = 0:0.1:5;
+lambda = [0:0.1:5];
 hidden_layer_sizes = [5, 10, 25, 50, 100, 150];
 ```
 
-Using `fmingc` with up to 5000 iterations were allowed. With hidden layer sizes above 25, all iterations were used up by the function. In addition to that, higher layer sizes seem to predict better with higher `λ`s.
+Using `fmingc` with up to 5000 iterations. With hidden layer sizes above 25, all iterations were used up by the function. In addition to that, higher layer sizes seem to predict better with higher `lambda`s.
 
 In the result graphs, only the best graph is shown out of all the hidden layer sizes.
 
 ### Support Vector Machines
 ```octave
-CSigma_seeds = 0.01:0.01:0.04;
+CSigma_seeds = [0.01:0.01:0.04];
 CSigma_iterations = 5;
 ```
 Here the C and sigma values were created by iterating over the `CSigma_seeds` vector in the following manner:
@@ -124,6 +124,7 @@ Here the C and sigma values were created by iterating over the `CSigma_seeds` ve
 ```octave
 function [pool] = generateValuePool(seeds, iterations)
 	pool = zeros(columns(seeds), iterations);
+	% Create powers of 10 of the seeds
 	for i = 0:iterations
 		pool(:, i + 1) = seeds .* (10 ^ i);
 	endfor
@@ -138,9 +139,12 @@ Iterations
 -------------
 
 Three sets of attributes were tested:
-* The original set of **APM**, **WorkersMade** and **MinimapRightClicks**.
-* All of the attributes.
-* A hand-picked set of attributes from a previous researcher(2). The selected attributes were the ones that scored highest. The column references are `[5, 6, 7, 12, 13, 14]`.
+
+- The original set of **APM**, **WorkersMade** and **MinimapRightClicks**.
+
+- All of the attributes.
+
+- A hand-picked set of attributes from a previous researcher(2). The selected attributes were the ones that scored highest. The column references are `[5, 6, 7, 12, 13, 14]`.
 
 Over these sets of attributes, two different approaches were used:
 
@@ -203,7 +207,7 @@ The poor results of the Support Vector Machines may be due to an undetected impl
 
 Decision Trees
 --------------
-Another researcher got similar results with decision trees for the binary decision problem, but because we set out to not use any library we didn't have any implementation of decision trees available.
+Another researcher(3) got similar results with decision trees for the binary decision problem, but because we set out to not use any library we didn't have any implementation of decision trees available.
 
 References
 ==========
