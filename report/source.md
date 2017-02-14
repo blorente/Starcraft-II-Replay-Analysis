@@ -215,5 +215,3 @@ References
 (3): [https://github.com/cjlin1/libsvm](https://github.com/cjlin1/libsvm)
 
 Original source for the project and this paper: [https://github.com/blorente/Starcraft-II-Replay-Analysis](https://github.com/blorente/Starcraft-II-Replay-Analysis)
-
-Pandoc compilation script and template by Álvaro Bermejo: [https://github.com/AlvarBer](https://github.com/AlvarBer)
